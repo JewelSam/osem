@@ -64,6 +64,14 @@ class ApplicationController < ActionController::Base
     redirect_to User.ichain_logout_url, error:  "This User is disabled. Please contact #{mail}!"
   end
 
+  rescue_from Errno::ECONNREFUSED do |exception|
+    if exception.to_s[ENV['OSEM_SMTP_ADDRESS']] && exception.to_s[ENV['OSEM_SMTP_PORT']]
+      redirect_to :back, error: 'Mail could not be sent, please try again later.'
+    else
+      raise exception
+    end
+  end
+
   def not_found
     raise ActionController::RoutingError.new('Not Found')
   end
